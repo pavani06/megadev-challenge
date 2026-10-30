@@ -44,14 +44,16 @@ not touch it; the hint does.
 Tuesday 12 May. Calendar says Monday 11 May." (R-41202), "Client in Lisbon got Tuesday. Client in
 Toronto got Monday." (R-41344), "The invite arrived before I made the booking." (R-41236). That reads
 as a time zone or day-boundary bug, not a date-order one. The desk had already listed these in
-`desk-notes.json`; the cause table filed them under `parser` because of their tenant.
+`desk-notes.json`; the cause table files them under `parser` because of their tenant, and so does
+the `parser` count here.
 
 ## How the count is made
 
 - One id, one report: the export repeats rows across its pages, and the repeats are dropped.
 - `parser` and `hint` come from `causes.ts` (tenant locale, booking form and channel), never from
   the intake tag. Intake guesses from the reporter's browser and disagrees with the tenant both ways.
-- `one-day` is the desk's own list in `desk-notes.json`; each of those bodies was read.
+- `one-day` is the desk's own list in `desk-notes.json`; each of those bodies was read. As in the
+  desk's view, they stay counted under `parser` as well.
 - The subject line does not tell them apart: "Month and day swapped?" heads reports of all three
   problems, so merging on subject ([decision 0001](/kb/decisions/0001-dedupe-by-subject)) put them in one ticket.
 

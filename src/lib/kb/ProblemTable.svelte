@@ -11,7 +11,7 @@
   const rows = uniqueById(reports as Report[]);
   const merged = $derived(rows.filter((r) => r.mergedInto === ticket));
   const groups = $derived(groupByProblem(rows, ticket, tenantOf, notes.oneDayMove));
-  const total = $derived(groups.reduce((n, g) => n + g.reports.length, 0));
+  const moved = $derived(groups.find((g) => g.problem === 'one-day')?.reports.length ?? 0);
   const channels = (c: Record<string, number>) =>
     Object.entries(c)
       .sort((a, b) => b[1] - a[1])
@@ -21,7 +21,7 @@
 
 <p class="sum">
   <strong>{merged.length}</strong> reports in #{ticket} ({(reports as Report[]).length} rows in the export, {(reports as Report[]).length - rows.length} of them repeats) ·
-  <strong>{groups.length}</strong> problems · {total} reports placed
+  <strong>{groups.length}</strong> problems
 </p>
 
 <table>
@@ -47,6 +47,10 @@
     {/each}
   </tbody>
 </table>
+
+{#if moved}
+  <p class="muted">The {moved} <code>one-day</code> reports are also counted under the cause the desk files them by tenant, as its own view does.</p>
+{/if}
 
 <style>
   .sum { font-size: 1.1rem; }
