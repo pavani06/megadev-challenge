@@ -1,0 +1,61 @@
+---
+layout: runbook
+title: '#4471 · three problems, one ticket each'
+owner: pavani06
+status: open
+reviewed: 2026-10-29
+signature: pavani06
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+</script>
+
+[#4471](/kb/incidents/4471) says one bug: the parser reads dates month first. Read report by report,
+the ticket holds three problems. Each one now has its own ticket, with the reports it covers.
+
+<ProblemTable
+  ticket={4471}
+  issues={{
+    parser: 'https://github.com/pavani06/megadev-challenge/issues/1',
+    hint: 'https://github.com/pavani06/megadev-challenge/issues/2',
+    'one-day': 'https://github.com/pavani06/megadev-challenge/issues/3',
+  }}
+/>
+
+<Callout kind="warn">
+Not one fix. The parser fix leaves the other two broken: the booking-v3 hint keeps asking for
+the month first, and the one-day moves have no month in them to flip.
+</Callout>
+
+## The three problems
+
+**`parser`: the shared parser reads every date month first.** Our tenants write the day first, so
+"7 April" comes out as 4 July. Every channel, every tenant. This is what #4471 already says.
+
+**`hint`: booking-v3's date field asks for the wrong order.** Under its date field the v3 form
+prints `MM/DD/YYYY`. People type what it shows, month first, and the form reads it the tenant's
+way, day first. Only reports sent through the form of a tenant on booking-v3. The parser fix does
+not touch it; the hint does.
+
+**`one-day`: a date one day off.** No day and month swap in these, a shift of one day: "Invite says
+Tuesday 12 May. Calendar says Monday 11 May." (R-41202), "Client in Lisbon got Tuesday. Client in
+Toronto got Monday." (R-41344), "The invite arrived before I made the booking." (R-41236). That reads
+as a time zone or day-boundary bug, not a date-order one. The desk had already listed these in
+`desk-notes.json`; the cause table filed them under `parser` because of their tenant.
+
+## How the count is made
+
+- One id, one report: the export repeats rows across its pages, and the repeats are dropped.
+- `parser` and `hint` come from `causes.ts` (tenant locale, booking form and channel), never from
+  the intake tag. Intake guesses from the reporter's browser and disagrees with the tenant both ways.
+- `one-day` is the desk's own list in `desk-notes.json`; each of those bodies was read.
+- The subject line does not tell them apart: "Month and day swapped?" heads reports of all three
+  problems, so merging on subject ([decision 0001](/kb/decisions/0001-dedupe-by-subject)) put them in one ticket.
+
+Every number on this page is computed at render time from `src/lib/data/`. The tickets carry the
+same counts and the list of report ids.
+
+<RenderStamp {signature} />
